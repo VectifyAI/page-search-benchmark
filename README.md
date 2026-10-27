@@ -17,8 +17,8 @@ text-embedding-3-large. The numbers on search.pageindex.ai come from here.
 
 Questions with **every** evidence page in the first 10: Page Search 93.8%, Voyage 65.0%, Gemini 45.0%, OpenAI 38.8%.
 
-**By default** (no `top_k`), Page Search lists the pages at relevance 0.3 or more, or 0.2 or more when fewer than
-3 are: 4.7 pages a question on average (median 4) out of a filing's 186. They hold 95.0% of the evidence pages, and
+**By default** (no `top_k`), Page Search lists the pages likely to help: 4.7 pages a question on average (median 4)
+out of a filing's 186. They hold 95.0% of the evidence pages, and
 leave out 97.1% of the filing's pages, and so of the tokens you would send your LLM.
 
 **Time** to search a new 160-page 10-K (3M, 2018) with one question, processing or embedding the pages included and

@@ -21,12 +21,6 @@ def ranked(scores):
     return [p + 1 for p in sorted(range(len(scores)), key=lambda p: (-scores[p], p))]
 
 
-def default_listing(scores):
-    """The pages the API lists without top_k: relevance 0.3 or more, or 0.2 or more when fewer than 3 are."""
-    strong = [p for p in ranked(scores) if scores[p - 1] >= 0.3]
-    return strong if len(strong) >= 3 else [p for p in ranked(scores) if scores[p - 1] >= 0.2]
-
-
 def main():
     # Some BLAS builds (Apple's Accelerate) warn on these products without cause; the scores are finite.
     np.seterr(all="ignore")
@@ -53,7 +47,7 @@ def main():
             complete += ev <= set(order[:10])
         print(f"{NAMES[method]:32s}" + "".join(f"{100 * found[k] / total:9.1f}%" for k in KS) + f"{100 * complete / len(qs):23.1f}%")
 
-    listed = [default_listing(scores["page_search"][q["id"]]) for q in qs]
+    listed = [json.loads((RESULTS / f"{q['id']}.json").read_text())["listed"] for q in qs]
     sizes = [len(scores["page_search"][q["id"]]) for q in qs]
     found = sum(len(evidence(q) & set(l)) for q, l in zip(qs, listed)) / sum(len(evidence(q)) for q in qs)
     print(f"\nPage Search by default: {statistics.mean(map(len, listed)):.1f} pages a question on average "

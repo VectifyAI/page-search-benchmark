@@ -1,5 +1,6 @@
 """Page Search API's relevance for every page, for each question: uploads the question's filing and searches it
-with top_k as large as the filing, so every page comes back with its relevance. Writes results/page_search/<id>.json.
+with top_k as large as the filing, so every page comes back with its relevance, and once more without top_k for the
+pages it lists by default. Writes results/page_search/<id>.json.
 
     PAGEINDEX_SEARCH_API_KEY=pis_live_... BENCHMARKS=../pageindex-benchmarks python scripts/page_search.py [ID ...]
 
@@ -30,13 +31,15 @@ def main():
             print(f"{q['id']}: {filing} is not in {PDFS}; skipped", flush=True)
             continue
         if filing not in docs:
-            docs[filing] = client.upload(PDFS / filing)  # the same file again is the same document
+            docs[filing] = client.documents.upload(PDFS / filing)  # the same file again is the same document
         doc = docs[filing]
         result = client.search(doc, [q["question"]], top_k=doc.pages)
         relevance = [0.0] * doc.pages
         for p in result.results[0].pages:
             relevance[p.page - 1] = p.relevance
-        (RESULTS / f"{q['id']}.json").write_text(json.dumps({"question": q["id"], "file": filing, "relevance": relevance}))
+        listed = [p.page for p in client.search(doc, [q["question"]]).results[0].pages]
+        (RESULTS / f"{q['id']}.json").write_text(json.dumps({"question": q["id"], "file": filing, "relevance": relevance,
+                                                            "listed": listed}))
         print(f"{q['id']}: {filing}, {doc.pages} pages, {result.seconds} s", flush=True)
 
 
